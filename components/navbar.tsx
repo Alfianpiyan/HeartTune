@@ -1,19 +1,12 @@
 "use client";
 
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
+import {Navbar,NavBody,NavItems,MobileNav,MobileNavHeader,MobileNavToggle,MobileNavMenu,} from "@/components/ui/resizable-navbar";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export function NavbarDemo() {
   const navItems = [
-    { name: "Write", link: "#write" },
+    { name: "Write", link: "/write" },
     { name: "Explore", link: "#explore" },
     { name: "Moments", link: "#moments" },
     { name: "How It Works", link: "#how-it-works" },
@@ -34,34 +27,37 @@ export function NavbarDemo() {
   return (
     <Navbar
       className={`
-         top-0
+         top-0 
         ${scrolled ? "py-2" : "py-4"}
       `}
     >
-      {/* Desktop */}
+      
       <NavBody className="hidden lg:flex">
 
-        {/* Logo */}
-        <span className="text-2xl font-bold text-[#1E3A5F] tracking-tight">
+        
+        <Link
+          href="/hero"
+          className="text-2xl font-bold text-[#1E3A5F] tracking-tight hover:opacity-75 transition-opacity"
+        >
           Heartune
-        </span>
+        </Link>
 
-        {/* Navigation */}
         <NavItems
           items={navItems}
           className="text-[#1E3A5F] font-semibold space-x-8"
         />
 
-        {/* Optional right slot */}
         <div className="w-6" />
       </NavBody>
 
-      {/* Mobile */}
       <MobileNav>
         <MobileNavHeader className="px-6 flex items-center justify-between">
-          <span className="text-xl font-bold text-[#1E3A5F]">
+          <Link
+            href="/hero"
+            className="text-xl font-bold text-[#1E3A5F] hover:opacity-75 transition-opacity"
+          >
             Heartune
-          </span>
+          </Link>
 
           <MobileNavToggle
             isOpen={isMobileMenuOpen}
@@ -72,7 +68,6 @@ export function NavbarDemo() {
         <MobileNavMenu
           isOpen={isMobileMenuOpen}
           onClose={() => setIsMobileMenuOpen(false)}
-          
         >
           {navItems.map((item, idx) => (
             <a
