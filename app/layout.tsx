@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono , Nunito , Homemade_Apple} from "next/font/google";
 import "./globals.css";
 import { NavbarDemo} from "@/components/navbar";
 
@@ -13,6 +13,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin"],
+});
+
+
+
 export const metadata: Metadata = {
   title: "Heartune",
   description: "Send your feelings anonymously",
@@ -25,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
+      <body className={`${nunito.variable}font-sans`}
         
       >
         <NavbarDemo />

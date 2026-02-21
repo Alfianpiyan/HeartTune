@@ -1,5 +1,9 @@
-import { cn } from "@/lib/utils";
+"use client";
+
 import { Marquee } from "@/components/ui/marquee";
+import { Lock } from "lucide-react";
+
+const N = "#0A1F3D";
 
 const songDedications = [
   {
@@ -8,52 +12,47 @@ const songDedications = [
     message: "wish i could forget how safe it felt being around you dulu",
     song: "Always",
     artist: "Daniel Caesar",
-    cover: "https://i.scdn.co/image/ab67616d0000b273...",
+    cover: "https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a",
   },
   {
-    from: "dio",
+    from: null,
     to: "vanya",
-    message:
-      "funny how someone bisa jadi stranger padahal they knew all your secrets",
+    message: "funny how someone bisa jadi stranger padahal they knew all your secrets",
     song: "White Ferrari",
     artist: "Frank Ocean",
-    cover: "https://i.scdn.co/image/ab67616d0000b273...",
+    cover: "https://i.scdn.co/image/ab67616d0000b2739b9b36b0e22870b9f542d937",
   },
   {
     from: "sarah",
     to: "marcel",
-    message:
-      "i still use the playlist u made pas aku sedih.. it still helps somehow",
+    message: "i still use the playlist u made pas aku sedih.. it still helps somehow",
     song: "Apocalypse",
     artist: "Cigarettes After Sex",
-    cover: "https://i.scdn.co/image/ab67616d0000b273...",
+    cover: "https://i.scdn.co/image/ab67616d0000b273ef0d4234e1a645740f77d59c",
   },
   {
-    from: "nina",
+    from: null,
     to: "keyra",
-    message:
-      "tiap lewat coffee shop itu i wonder if u still remember our promises",
-    song: "Someone To Spend Time Wi...",
+    message: "tiap lewat coffee shop itu i wonder if u still remember our promises",
+    song: "Someone To Spend Time With",
     artist: "Los Retros",
-    cover: "https://i.scdn.co/image/ab67616d0000b273...",
+    cover: "https://i.scdn.co/image/ab67616d0000b2733d98ce55db4b9f5f9c2e3b3a",
   },
   {
     from: "ryan",
     to: "reza",
-    message:
-      "masih ada notes kita di gallery, full of plans yang ga pernah kejadian",
-    song: "when was it over? (feat...)",
-    artist: "Sasha Alex Sloan, Sam Hunt",
-    cover: "https://i.scdn.co/image/ab67616d0000b273...",
+    message: "masih ada notes kita di gallery, full of plans yang ga pernah kejadian",
+    song: "when was it over?",
+    artist: "Sasha Alex Sloan",
+    cover: "https://i.scdn.co/image/ab67616d0000b273c6e9e0b6b2c7b6f4b3d5e7a1",
   },
   {
-    from: "mira",
+    from: null,
     to: "nayla",
-    message:
-      "thank you for being my safe place through 2023.. even if we drifted",
+    message: "thank you for being my safe place through 2023.. even if we drifted",
     song: "SOUL LADY",
     artist: "YUKIKA",
-    cover: "https://i.scdn.co/image/ab67616d0000b273...",
+    cover: "https://i.scdn.co/image/ab67616d0000b273b1c4e2d3f5a6b7c8d9e0f1a2",
   },
 ];
 
@@ -61,14 +60,9 @@ const firstRow = songDedications.slice(0, songDedications.length / 2);
 const secondRow = songDedications.slice(songDedications.length / 2);
 
 const SongCard = ({
-  from,
-  to,
-  message,
-  song,
-  artist,
-  cover,
+  from,to,message,song,artist,cover,
 }: {
-  from: string;
+  from: string | null;
   to: string;
   message: string;
   song: string;
@@ -77,55 +71,83 @@ const SongCard = ({
 }) => {
   return (
     <figure
-      className={cn(
-        "relative w-[420px] h-[180px] cursor-pointer overflow-hidden rounded-xl border p-5",
-        "border-gray-200 bg-white shadow-sm",
-        "hover:shadow-md transition-all duration-300",
-        "dark:border-gray-700 dark:bg-gray-800",
-        "flex flex-col justify-between",
-      )}
-      style={{ fontFamily: "'Nunito', sans-serif" }}
+      className="relative w-[300px] rounded-2xl overflow-hidden border bg-white flex flex-col"
+      style={{
+        borderColor: `${N}14`,
+        boxShadow: `0 4px 20px ${N}0A`,
+      }}
     >
-      <div>
-        <p className="text-sm text-gray-500 dark:text-blue-300 mb-2">
-          To: <span className="font-semibold">{to}</span>
-        </p>
+      <div className="p-4 flex flex-col gap-3 flex-1">
+        <div className="flex items-baseline gap-1.5">
+          <span
+            className="text-[9px] font-bold uppercase tracking-widest shrink-0"
+            style={{ color: `${N}45` }}
+          >
+            Untuk
+          </span>
+          <span className="text-[13px] font-bold truncate" style={{ color: N }}>
+            {to}
+          </span>
+        </div>
 
-        <div className="mb-3">
+        <div className="relative flex-1">
+          <span
+            className="absolute -left-1 -top-2 text-4xl font-serif select-none leading-none"
+            style={{ color: `${N}0D` }}
+          >
+            "
+          </span>
           <p
-            className="text-base text-gray-900 dark:text-blue-200 leading-relaxed line-clamp-3"
-            style={{ fontFamily: "'Nunito', sans-serif" }}
+            className="text-[12px] leading-relaxed italic pl-2 line-clamp-3"
+            style={{ color: `${N}CC` }}
           >
             {message}
           </p>
         </div>
-      </div>
-
-      <div className="flex items-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-        <img
-          src={cover}
-          alt={song}
-          className="w-11 h-11 rounded object-cover flex-shrink-0"
-        />
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-blue-400 truncate">
-            {song}
-          </h3>
-          <p className="text-xs text-gray-500 dark:text-blue-300 truncate">
-            {artist}
-          </p>
-        </div>
-        <div className="flex-shrink-0">
-          <div className="w-7 h-7 bg-black rounded-full flex items-center justify-center">
-            <svg
-              className="w-3.5 h-3.5 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
-            </svg>
+        <div
+          className="flex items-center gap-2.5 rounded-xl p-2.5 border mt-1"
+          style={{
+            background: `linear-gradient(135deg, ${N}06, #2B6CB010)`,
+            borderColor: `${N}0E`,
+          }}
+        >
+          <img
+            src={cover}
+            alt={song}
+            className="w-9 h-9 rounded-lg object-cover shadow-sm shrink-0"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src =
+                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23D4DEF0' rx='8'/%3E%3C/svg%3E";
+            }}
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-bold truncate" style={{ color: N }}>
+              {song}
+            </p>
+            <p className="text-[9px] truncate mt-0.5" style={{ color: `${N}55` }}>
+              {artist}
+            </p>
           </div>
         </div>
+
+        <div className="flex items-center gap-1.5">
+          {from === null ? (
+            <>
+              <Lock className="w-3 h-3 shrink-0" style={{ color: `${N}40` }} />
+              <span className="text-[10px] font-medium" style={{ color: `${N}45` }}>
+                Dikirim secara anonim
+              </span>
+            </>
+          ) : (
+            <span className="text-[10px] font-medium" style={{ color: `${N}45` }}>
+              Dari{" "}
+              <span className="font-bold" style={{ color: N }}>
+                {from}
+              </span>
+            </span>
+          )}
+        </div>
+
       </div>
     </figure>
   );
@@ -133,19 +155,20 @@ const SongCard = ({
 
 export function MarqueeDemo() {
   return (
-    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden py-8 bg-gray-50 dark:bg-gray-900">
-      <Marquee pauseOnHover className="[--duration:30s] mb-4">
+    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden py-10 bg-white">
+      <Marquee pauseOnHover className="[--duration:35s] mb-3">
         {firstRow.map((dedication, idx) => (
           <SongCard key={idx} {...dedication} />
         ))}
       </Marquee>
-      <Marquee reverse pauseOnHover className="[--duration:30s]">
+      <Marquee reverse pauseOnHover className="[--duration:35s]">
         {secondRow.map((dedication, idx) => (
           <SongCard key={idx} {...dedication} />
         ))}
       </Marquee>
-      <div className="from-gray-50 dark:from-gray-900 pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r"></div>
-      <div className="from-gray-50 dark:from-gray-900 pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l"></div>
+
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-white to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-white to-transparent" />
     </div>
   );
 }
