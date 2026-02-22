@@ -8,7 +8,8 @@ import { getStepperSteps } from "@/components/landing/miniStepper";
 import { MusicCard } from "@/components/landing/musicCard";
 import { ChooseMusic } from "@/components/landing/chooseMusic";
 import Link from "next/link";
-
+import { supabase } from "@/lib/db";
+import Image from "next/image";
 
 function MiniStepper({ steps }: { steps: React.ReactNode[] }) {
   const [current, setCurrent] = useState(0);
@@ -91,128 +92,99 @@ function MiniStepper({ steps }: { steps: React.ReactNode[] }) {
 }
 
 
-const RECENT_FESSES = [
-  {
-    song: "Lover", artist: "Taylor Swift",
-    preview: "semoga kamu tahu ini untukmu ",
-    time: "just now",
-  },
-  {
-    song: "Die With A Smile", artist: "Bruno Mars",
-    preview: "rindu itu nyata, meski kamu tidak tahu",
-    time: "2m ago",
-  },
-  {
-    song: "Cinta Luar Biasa", artist: "Andmesh",
-    preview: "tidak ada kata yang cukup, jadi kukirim ini",
-    time: "5m ago",
-  },
-  {
-    song: "A Thousand Years", artist: "Christina Perri",
-    preview: "masih menunggu di lagu yang sama",
-    time: "9m ago",
-  },
-  {
-    song: "Rewrite The Stars", artist: "Zac Efron",
-    preview: "andai bintang bisa menjawab doaku",
-    time: "14m ago",
-  },
-];
-
-function RecentFessTicker() {
-  const [idx, setIdx] = useState(0);
-  const [phase, setPhase] = useState<"in" | "out">("in");
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setPhase("out");
-      setTimeout(() => {
-        setIdx((p) => (p + 1) % RECENT_FESSES.length);
-        setPhase("in");
-      }, 320);
-    }, 3400);
-    return () => clearInterval(timer);
-  }, []);
-
-  const f = RECENT_FESSES[idx];
-
-  return (
-    <motion.div
-      key={idx}
-      animate={{ opacity: phase === "in" ? 1 : 0, y: phase === "in" ? 0 : -8 }}
-      transition={{ duration: 0.32, ease: "easeInOut" }}
-      className="relative flex items-start gap-3 bg-gradient-to-r from-[#E8EEF5] to-[#D4DEF0] rounded-xl border border-[#D4DEF0] px-3 py-2.5 overflow-hidden"
-    >
-      {/* decorative note */}
-      <span className="absolute right-3 top-2 text-xl opacity-20 select-none text-[#0A1F3D]">♪</span>
-
-      <div className="flex-1 min-w-0 pr-6">
-        <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-          <span
-            className="text-[9px] font-bold bg-clip-text text-transparent"
-            style={{ backgroundImage: "linear-gradient(135deg, #0A1F3D 0%, #4A7FBD 100%)" }}
-          >
-            {f.song}
-          </span>
-          <span className="text-[7px] text-[#0A1F3D]/30">—</span>
-          <span className="text-[7px] font-semibold text-[#0A1F3D]/55 bg-[#0A1F3D]/8 px-1.5 py-0.5 rounded-full">
-            {f.artist}
-          </span>
-        </div>
-        <p className="text-[8px] text-[#0A1F3D]/60 truncate italic">"{f.preview}"</p>
-      </div>
-      <span className="text-[7px] text-[#0A1F3D]/35 shrink-0 font-medium self-start mt-0.5">{f.time}</span>
-    </motion.div>
-  );
-}
-
 function SocialProof() {
+  const [fesses, setFesses] = useState<any[]>([]);
   const [idx, setIdx] = useState(0);
+
   useEffect(() => {
-    const timer = setInterval(() => setIdx((p) => (p + 1) % RECENT_FESSES.length), 3400);
-    return () => clearInterval(timer);
+    const fetchFesses = async () => {
+      const { data, error } = await supabase
+        .from("tb_pesan")
+        .select("music_cover, music_title, music_artist, pesan, created_at")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (!error && data) {
+        setFesses(data);
+      }
+    };
+
+    fetchFesses();
   }, []);
 
+  useEffect(() => {
+    if (fesses.length === 0) return;
+    const timer = setInterval(() => {
+      setIdx((p) => (p + 1) % fesses.length);
+    }, 3400);
+
+    return () => clearInterval(timer);
+  }, [fesses]);
+
+  if (fesses.length === 0) return null;
+
+  const f = fesses[idx];
+
   return (
-  
     <div className="mt-8 space-y-3 max-w-md">
       <div className="flex items-center justify-between">
         <span className="text-[9px] font-semibold text-[#0A1F3D]/50 tracking-widest uppercase">
           Recently Sent
         </span>
-        <div className="flex items-center gap-1">
-          {RECENT_FESSES.map((_, i) => (
-            <motion.div
-              key={i}
-              animate={{ width: i === idx ? 14 : 4, backgroundColor: i === idx ? "#0A1F3D" : "#D1D5DB" }}
-              transition={{ duration: 0.3 }}
-              className="h-1 rounded-full"
-            />
-          ))}
-        </div>
       </div>
 
-      <RecentFessTicker />
+   <motion.div
+  key={idx}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.3 }}
+  className="relative flex gap-3 bg-layer-to-r from-[#E8EEF5] to-[#D4DEF0] rounded-xl border border-[#D4DEF0] px-3 py-3 overflow-hidden"
+>
+  <span className="absolute right-3 top-2 text-xl opacity-20 select-none text-[#0A1F3D]">
+    ♪
+  </span>
 
-      <div className="flex items-center justify-between pt-0.5">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-0.5">
-            {["♪","♫","♬","♪","♫"].map((note, i) => (
-              <span key={i} className="text-[10px] text-[#0A1F3D]/20 font-bold">
-                {note}
-              </span>
-            ))}
-          </div>
-          <span className="text-[9px] text-[#0A1F3D]/60">
-            <span className="font-bold text-[#0A1F3D]">1,000+</span> melodies shared
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}>
-            <HeartIcon className="w-3 h-3 fill-rose-400 text-rose-400" />
-          </motion.div>
-          <span className="text-[8px] font-semibold text-rose-400">always growing</span>
-        </div>
+  {/* COVER */}
+  <Image
+    alt="cover"
+    src={f.music_cover}
+    width={44}
+    height={44}
+    className="rounded-lg object-cover shrink-0"
+  />
+
+  {/* CONTENT */}
+  <div className="flex flex-col justify-center min-w-0">
+    <div className="flex items-center gap-1.5 flex-wrap">
+      <span
+        className="text-[10px] font-bold bg-clip-text text-transparent truncate"
+        style={{
+          backgroundImage:
+            "linear-layer(135deg, #0A1F3D 0%, #4A7FBD 100%)",
+        }}
+      >
+        {f.music_title}
+      </span>
+
+      <span className="text-[8px] text-[#0A1F3D]/40">—</span>
+
+      <span className="text-[8px] font-semibold text-[#0A1F3D]/60">
+        {f.music_artist}
+      </span>
+    </div>
+
+    <p className="text-[9px] text-[#0A1F3D]/60 italic truncate mt-1">
+      "{f.pesan.slice(0, 50)}..."
+    </p>
+  </div>
+</motion.div>
+
+      <div className="flex items-center gap-2 pt-1">
+        <span className="text-[9px] text-[#0A1F3D]/60">
+          <span className="font-bold text-[#0A1F3D]">
+            {fesses.length}+
+          </span>{" "}
+          melodies shared
+        </span>
       </div>
     </div>
   );
@@ -220,25 +192,53 @@ function SocialProof() {
 
 
 
-
+type Song = {
+  id: string;
+  title: string;
+  artist: string;
+  cover: string;
+  preview: string;
+};
 export function Hero() {
-  const [songName, setSongName] = useState("Perfect - Ed Sheeran");
+ const [songs, setSongs] = useState<Song[]>([]);
+const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [message, setMessage] = useState("");
   const [recipient, setRecipient] = useState("");
 
-  const songs = [
-    "Perfect - Ed Sheeran",
-    "All of Me - John Legend",
-    "Thinking Out Loud - Ed Sheeran",
-    "A Thousand Years - Christina Perri",
-  ];
+ useEffect(() => {
+  const fetchSong = async () => {
+    try {
+      const res = await fetch("/api/deezer?q=katty");
+      const data = await res.json();
+
+      if (data?.data?.length > 0) {
+        const formatted = data.data.slice(0, 5).map((track: any) => ({
+          id: track.id,
+          title: track.title,
+          artist: track.artist.name,
+          cover: track.album.cover_medium,
+          preview: track.preview,
+        }));
+
+        setSongs(formatted);
+        setSelectedSong(formatted[0]); // default pilih pertama
+      }
+    } catch (err) {
+      console.error("Failed fetching song", err);
+    }
+  };
+
+  fetchSong();
+}, []);
 
   const stepperSteps = getStepperSteps({
-    message, setMessage,
-    recipient, setRecipient,
-    songName, setSongName,
-    songs,
-  });
+  message,
+  setMessage,
+  recipient,
+  setRecipient,
+  songs,
+  selectedSong
+});
 
 
   return (
@@ -269,7 +269,7 @@ export function Hero() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="relative z-10 lg:pt-4"
             >
-              <div className="mb-8 h-[50px] sm:h-[55px] lg:h-[60px]">
+              <div className="mb-8 h-12 sm:h-13.75 lg:h-15">
                 <TypingAnimation
                   className="handwritten text-2xl sm:text-3xl lg:text-4xl text-[#0A1F3D] leading-tight"
                   duration={80} delay={300}
@@ -295,7 +295,7 @@ export function Hero() {
                   <span className="relative z-10 flex items-center gap-2">
                     <PenIcon className="w-4 h-4" /> Write Your Melody
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#1E3A5F] to-[#0A1F3D] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-layer-to-r from-[#1E3A5F] to-[#0A1F3D] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
                 <Link href="/browse" className="px-5 py-2.5 bg-white text-[#0A1F3D] border-2 border-[#0A1F3D] rounded-lg font-semibold text-sm hover:bg-[#F5F8FC] transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2">
                   <SearchIcon className="w-4 h-4" /> Explore Collection
@@ -327,7 +327,7 @@ export function Hero() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.6 }}
-                  className="col-start-1 col-span-2 row-start-1 bg-gradient-to-br from-[#E8EEF5] to-[#D4DEF0] rounded-2xl border border-[#D4DEF0] p-3 shadow-sm overflow-hidden"
+                  className="col-start-1 col-span-2 row-start-1 bg-layer-to-br from-[#E8EEF5] to-[#D4DEF0] rounded-2xl border border-[#D4DEF0] p-3 shadow-sm overflow-hidden"
                 >
                   <MiniStepper steps={stepperSteps} />
                 </motion.div>
@@ -345,9 +345,13 @@ export function Hero() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.9 }}
-                  className="col-start-1 col-span-2 row-start-2 bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-50 p-3 shadow-sm overflow-hidden"
+                  className="col-start-1 col-span-2 row-start-2 bg-layer-to-br from-white to-gray-50 rounded-2xl border border-gray-50 p-3 shadow-sm overflow-hidden"
                 >
-                  <MusicCard song={songName} artist="Ed Sheeran" />
+           <MusicCard
+  song={selectedSong?.title || "Loading..."}
+  artist={selectedSong?.artist || ""}
+  cover={selectedSong?.cover || "/images/default-cover.png"}
+/>
                 </motion.div>
 
               </div>

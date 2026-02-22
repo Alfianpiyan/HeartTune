@@ -1,30 +1,36 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Check, X, Loader2 } from "lucide-react";
+import { Search, Check, X, Loader2, Play, Pause } from "lucide-react";
 
 interface DeezerTrack {
   id: number;
   title: string;
+  preview: string;
   artist: { name: string };
   album: { cover_small: string; cover_medium: string };
 }
+
 
 export interface SelectedSong {
   id: string;
   title: string;
   artist: string;
   cover: string;
+  preview: string;
 }
 
 type Props = {
   selected: SelectedSong | null;
+  playingId: string | null;
+  isPlaying: boolean;
   onSelect: (s: SelectedSong) => void;
+  onPreview: (s: SelectedSong) => void;
 };
 
 const N = "#0A1F3D";
 
-export default function SongPickerList({ selected, onSelect }: Props) {
+export default function SongPickerList({ selected, onSelect, onPreview, isPlaying, playingId }: Props) {
   const [query, setQuery] = useState("");
   const [tracks, setTracks] = useState<DeezerTrack[]>([]);
   const [loading, setLoading] = useState(false);
@@ -37,8 +43,11 @@ export default function SongPickerList({ selected, onSelect }: Props) {
     const t = setTimeout(async () => {
       try {
         const res = await fetch(`/api/deezer?q=${encodeURIComponent(term)}`);
+
+        console.log(res.status);
         if (!res.ok) throw new Error();
         const data = await res.json();
+        console.log("FULL DATA:", data);
         if (!cancelled) {
           setTracks((data.data ?? []).slice(0, 20));
           setLoading(false);
@@ -48,7 +57,10 @@ export default function SongPickerList({ selected, onSelect }: Props) {
       }
     }, 350);
 
-    return () => { cancelled = true; clearTimeout(t); };
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, [query]);
 
   const handleSelect = (track: DeezerTrack) => {
@@ -57,8 +69,13 @@ export default function SongPickerList({ selected, onSelect }: Props) {
       title: track.title,
       artist: track.artist.name,
       cover: track.album.cover_medium || track.album.cover_small,
+      preview: track.preview,
     });
   };
+
+  
+
+  
 
   return (
     <div className="flex flex-col h-full">
@@ -67,7 +84,10 @@ export default function SongPickerList({ selected, onSelect }: Props) {
           className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl"
           style={{ background: `${N}07`, border: `1px solid ${N}14` }}
         >
-          <Search className="w-3.5 h-3.5 shrink-0" style={{ color: `${N}70` }} />
+          <Search
+            className="w-3.5 h-3.5 shrink-0"
+            style={{ color: `${N}70` }}
+          />
           <input
             type="text"
             value={query}
@@ -77,7 +97,12 @@ export default function SongPickerList({ selected, onSelect }: Props) {
             style={{ color: N }}
             autoFocus
           />
-          {loading && <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" style={{ color: `${N}50` }} />}
+          {loading && (
+            <Loader2
+              className="w-3.5 h-3.5 animate-spin shrink-0"
+              style={{ color: `${N}50` }}
+            />
+          )}
           {!loading && query && (
             <button type="button" onClick={() => setQuery("")}>
               <X className="w-3.5 h-3.5" style={{ color: `${N}50` }} />
@@ -93,39 +118,67 @@ export default function SongPickerList({ selected, onSelect }: Props) {
           </div>
         ) : (
           <div className="space-y-0.5">
-            {tracks.map((track) => {
-              const isSel = selected?.id === String(track.id);
-              return (
-                <button
-                  key={track.id}
-                  type="button"
-                  onClick={() => handleSelect(track)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
-                  style={{ background: isSel ? "#EBF4FF" : "transparent" }}
-                  onMouseEnter={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = `${N}05`; }}
-                  onMouseLeave={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                >
-                  <img
-                    src={track.album.cover_small}
-                    alt={track.title}
-                    className="w-9 h-9 rounded-lg object-cover shrink-0 shadow-sm"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold truncate" style={{ color: isSel ? "#1E4080" : N }}>
-                      {track.title}
-                    </p>
-                    <p className="text-[11px] truncate mt-0.5" style={{ color: `${N}60` }}>
-                      {track.artist.name}
-                    </p>
-                  </div>
-                  {isSel && (
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: "#2B6CB0" }}>
-                      <Check className="w-3 h-3 text-white" />
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+           {tracks.map((track) => {
+  const isSel = selected?.id === String(track.id);
+  const isPlayingThis = isPlaying && playingId === String(track.id);
+
+  return (
+    <div
+      key={track.id}
+      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl"
+      style={{ background: isSel ? "#EBF4FF" : "transparent" }}
+    >
+      {/* PLAY BUTTON (PREVIEW ONLY) */}
+      <button
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation();
+    onPreview({
+      id: String(track.id),
+      title: track.title,
+      artist: track.artist.name,
+      cover: track.album.cover_medium || track.album.cover_small,
+      preview: track.preview,
+    });
+  }}
+  className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 shrink-0"
+>
+ {isPlayingThis ? (
+  <Pause size={12} style={{ color: `${N}50` }} />
+) : (
+  <Play size={12} style={{ color: `${N}50` }} />
+)}
+</button>
+
+      {/* SELECT SONG */}
+      <button
+        type="button"
+        onClick={() => handleSelect(track)}
+        className="flex-1 flex items-center gap-3 text-left"
+      >
+        <img
+          src={track.album.cover_small}
+          className="w-9 h-9 rounded-lg object-cover shrink-0"
+        />
+
+        <div className="min-w-0">
+          <p className="text-[13px] font-semibold truncate">
+            {track.title}
+          </p>
+          <p className="text-[11px] truncate mt-0.5">
+            {track.artist.name}
+          </p>
+        </div>
+      </button>
+
+      {isSel && (
+        <span className="w-5 h-5 rounded-full flex items-center justify-center bg-blue-600">
+          <Check className="w-3 h-3 text-white" />
+        </span>
+      )}
+    </div>
+  );
+})}
           </div>
         )}
       </div>

@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 interface MusicCardProps {
   song?: string;
   artist?: string;
+  cover?:string
 }
 
 export function MusicCard({ song = "Unknown Song", artist = "Unknown Artist" }: MusicCardProps) {

@@ -1,6 +1,5 @@
 "use client";
 
-
 import React, { useState, useEffect } from "react";
 
 import SongFessForm from "@/components/writeFess/form";

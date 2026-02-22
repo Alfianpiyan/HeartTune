@@ -15,10 +15,12 @@ import {
 import { motion } from "framer-motion";
 import { Song } from "@/lib/song";
 
+
 interface PreviewCardProps {
   recipient: string;
   sender?: string;     
   message: string;
+   preview?: string;
   song: Song | null;
   isAnon: boolean;
   isPlaying: boolean;
@@ -32,6 +34,7 @@ export default function PreviewCard({
   sender = "",
   message,
   song,
+  preview,
   isAnon,
   isPlaying,
   onTogglePlay,
@@ -39,7 +42,6 @@ export default function PreviewCard({
   const isEmpty = !recipient && !message && !song;
 
   const displaySender = isAnon ? null : sender.trim() || null;
-
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -190,6 +192,7 @@ export default function PreviewCard({
                     </button>
                     <button
                       onClick={onTogglePlay}
+                      type="button"
                       className="w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-opacity hover:opacity-80"
                       style={{ background: N }}
                     >

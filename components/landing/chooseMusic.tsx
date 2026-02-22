@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 interface DeezerTrack {
   id: number;
   title: string;
+  preview: string; 
   artist: { name: string };
   album: { cover_small: string; cover_medium: string };
 }
@@ -43,6 +44,7 @@ export function ChooseMusic() {
       songId: String(track.id),
       songTitle: track.title,
       songArtist: track.artist.name,
+      songPreview: track.preview,
       songCover: track.album.cover_medium || track.album.cover_small,
     });
 // ini buat arahin halaman ketika salag satu musik dipencet

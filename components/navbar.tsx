@@ -33,6 +33,7 @@ export function NavbarDemo() {
       <style>{`
         @import url("https://fonts.googleapis.com/css2?family=Homemade+Apple&display=swap");
         .nav-logo { font-family: "Homemade Apple", cursive; }
+        .pesan { font-family: "Homemade Apple", cursive; }
       `}</style>
 
       <Navbar className={`top-0 transition-all duration-300 ${scrolled ? "py-2" : "py-4"}`}>

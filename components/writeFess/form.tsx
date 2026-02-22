@@ -6,6 +6,10 @@ import SongPickerList, { SelectedSong } from "@/components/writeFess/songPicker"
 import PreviewCard from "@/components/writeFess/previewCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
+import { useAudioPlayer } from "@/hooks/useAudioPlayer";
+import { supabase } from "@/lib/db";
+import { useRouter } from "next/navigation";
+import { Variants } from "framer-motion";
 
 const N = "#0A1F3D";
 
@@ -88,9 +92,10 @@ function AnonToggle({ value, onChange }: { value: boolean; onChange: (v: boolean
 
 function MessageWithSongIcon({
   message, onChange, charLimit, error,
-  selectedSong, songPanelOpen, onToggleSong, onSelectSong, songError,
+  selectedSong, songPanelOpen, onToggleSong, onSelectSong,  onPreviewSong, songError,audio
 }: {
   message: string;
+  onPreviewSong: (song: SelectedSong) => void;
   onChange: (v: string) => void;
   charLimit: number;
   error?: string;
@@ -98,6 +103,7 @@ function MessageWithSongIcon({
   songPanelOpen: boolean;
   onToggleSong: () => void;
   onSelectSong: (s: SelectedSong) => void;
+  audio: ReturnType<typeof useAudioPlayer>;
   songError?: string;
 }) {
   const charLeft = charLimit - message.length;
@@ -224,12 +230,13 @@ function MessageWithSongIcon({
               style={{ borderTop: `1px solid #2B6CB025` }}
             >
               <div className="h-full pt-2 pb-1">
-                <SongPickerList
-                  selected={selectedSong}
-                  onSelect={(song) => {
-                    onSelectSong(song);
-                  }}
-                />
+        <SongPickerList
+  selected={selectedSong}
+  playingId={audio.currentId}
+  isPlaying={audio.isPlaying}
+  onSelect={onSelectSong}
+  onPreview={(song) => audio.toggle(song.preview, song.id)} // ✅ pakai toggle
+/>
               </div>
             </motion.div>
           )}
@@ -246,7 +253,7 @@ function MessageWithSongIcon({
   );
 }
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 18 },
   show: (i = 0) => ({
     opacity: 1, y: 0,
@@ -256,29 +263,30 @@ const fadeUp = {
 
 
 function FormInner() {
+  const audio = useAudioPlayer();
   const searchParams = useSearchParams();
-
   const [recipient, setRecipient] = useState("");
-  const [sender, setSender] = useState("");
   const [message, setMessage] = useState("");
   const [selectedSong, setSelectedSong] = useState<SelectedSong | null>(null);
-  const [isAnon, setIsAnon] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [sender, setSender] = useState("");
+  const [isAnon, setIsAnon] = useState(true); // Default-kan ke true (anonim)
   const [songPanelOpen, setSongPanelOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
+  const router = useRouter()
   const charLimit = 500;
 
-  useEffect(() => {
-    const id = searchParams.get("songId");
-    const title = searchParams.get("songTitle");
-    const artist = searchParams.get("songArtist");
-    const cover = searchParams.get("songCover");
-    if (id && title && artist && cover && !selectedSong) {
-      setSelectedSong({ id, title, artist, cover });
-    }
-  }, []);
+useEffect(() => {
+  const id = searchParams.get("songId");
+  const title = searchParams.get("songTitle");
+  const artist = searchParams.get("songArtist");
+  const cover = searchParams.get("songCover");
+  const preview = searchParams.get("songPreview");
+
+  if (id && title && artist && cover && preview && !selectedSong) {
+    setSelectedSong({ id, title, artist, cover, preview });
+  }
+}, [searchParams, selectedSong]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -289,19 +297,67 @@ function FormInner() {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
+  const getDeviceId = () => {
+  if (typeof window === "undefined") return null;
+
+  let id = localStorage.getItem("device_id");
+
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("device_id", id);
+  }
+
+  return id;
+};
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validate()) return;
+
+    const namaFinal = isAnon 
+    ? "Anonim" 
+    : (sender.trim() || "Seseorang");
+
+  const deviceId = getDeviceId();
+
+  try {
+    const { error } = await supabase.from("tb_pesan").insert({
+      nama_pengirim: namaFinal,
+      nama_tujuan: recipient,
+      pesan: message,
+       deezer_id: selectedSong?.id,
+      music_title: selectedSong?.title,
+      music_artist: selectedSong?.artist,
+      music_cover: selectedSong?.cover,
+      music_preview: selectedSong?.preview,
+      device_id: deviceId,
+    });
+
+    if (error) {
+      console.error(error);
+      alert("Gagal kirim fess 😢");
+      return;
+    }
+
     setSubmitted(true);
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Terjadi kesalahan");
+  }
+};
 
   const handleReset = () => {
-    setSubmitted(false);
-    setRecipient(""); setSender(""); setMessage("");
-    setSelectedSong(null); setIsAnon(false); setIsPlaying(false);
-    setSongPanelOpen(false); setErrors({});
-  };
-
+  audio.stop();
+  setSubmitted(false);
+  setRecipient("");
+  setSender("");
+  setMessage("");
+  setSelectedSong(null);
+  setIsAnon(false);
+  setSongPanelOpen(false);
+  setErrors({});
+  router.push("/write")
+};
   const songForPreview = selectedSong
     ? { id: selectedSong.id, title: selectedSong.title, artist: selectedSong.artist, cover: selectedSong.cover }
     : null;
@@ -354,21 +410,24 @@ function FormInner() {
                 
                   <div className="h-px" style={{ background: `${N}0D` }} />
 
-                  <MessageWithSongIcon
-                    message={message}
-                    onChange={(v) => { setMessage(v); if (errors.message) setErrors(p => ({ ...p, message: "" })); }}
-                    charLimit={charLimit}
-                    error={errors.message}
-                    selectedSong={selectedSong}
-                    songPanelOpen={songPanelOpen}
-                    onToggleSong={() => setSongPanelOpen(o => !o)}
-                    onSelectSong={(song) => {
-                      setSelectedSong(song);
-                      setSongPanelOpen(false);
-                      if (errors.song) setErrors(p => ({ ...p, song: "" }));
-                    }}
-                    songError={errors.song}
-                  />
+               <MessageWithSongIcon
+               
+  message={message}
+  onChange={setMessage}
+  charLimit={charLimit}
+  error={errors.message}
+  selectedSong={selectedSong}
+  songPanelOpen={songPanelOpen}
+  onToggleSong={() => setSongPanelOpen(o => !o)}
+  onSelectSong={(song) => {
+    setSelectedSong(song);
+    setSongPanelOpen(false);
+    if (errors.song) setErrors(p => ({ ...p, song: "" }));
+  }}
+  onPreviewSong={(song) => audio.toggle(song.preview, song.id)}
+  audio={audio} 
+  songError={errors.song}
+/>
 
                 </div>
               </div>
@@ -389,16 +448,24 @@ function FormInner() {
                   <div className="h-px flex-1" style={{ background: `${N}10` }} />
                 </div>
 
-                <PreviewCard
-                  recipient={recipient}
-                  sender={sender}
-                  message={message}
-                  song={songForPreview}
-                  isAnon={isAnon}
-                  isPlaying={isPlaying}
-                  onTogglePlay={() => setIsPlaying(!isPlaying)}
-                />
-
+               <PreviewCard
+  recipient={recipient}
+  sender={sender}
+  message={message}
+ song={selectedSong ? ({
+  id: selectedSong.id,
+  title: selectedSong.title,
+  artist: selectedSong.artist,
+  cover: selectedSong.cover,
+  preview: selectedSong.preview,
+} as any) : null}
+  isAnon={isAnon}
+  isPlaying={audio.isPlaying}
+  onTogglePlay={() => {
+  if (!selectedSong?.preview) return;
+  audio.toggle(selectedSong.preview, selectedSong.id);
+}}
+/>
                    <motion.button
                   whileHover={{ scale: 1.025 }}
                   whileTap={{ scale: 0.965 }}

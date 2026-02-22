@@ -1,11 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Music2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/db";
+import Link from "next/link";
 
 const N = "#0A1F3D";
 
+const getDeviceId = () => {
+  if (typeof window === "undefined") return null;
+
+  let id = localStorage.getItem("device_id");
+
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("device_id", id);
+  }
+
+  return id;
+};
 
 interface FessItem {
   id: string;
@@ -21,7 +35,6 @@ interface FessItem {
   createdAt: string;
 }
 
-
 function FessCard({ fess, index }: { fess: FessItem; index: number }) {
   return (
     <motion.div
@@ -34,7 +47,7 @@ function FessCard({ fess, index }: { fess: FessItem; index: number }) {
         boxShadow: `0 2px 16px ${N}08`,
       }}
     >
-
+ <Link href={`/detail/${fess.id}`}>
       <div className="relative aspect-square overflow-hidden" style={{ background: `${N}07` }}>
         {fess.song.cover ? (
           <img
@@ -47,7 +60,6 @@ function FessCard({ fess, index }: { fess: FessItem; index: number }) {
             <Music2 className="w-8 h-8" style={{ color: `${N}25` }} />
           </div>
         )}
-
 
         <div
           className="absolute inset-0"
@@ -63,6 +75,7 @@ function FessCard({ fess, index }: { fess: FessItem; index: number }) {
           </p>
         </div>
       </div>
+
       <div className="px-3.5 pt-3 pb-3.5 space-y-1.5">
         <div className="flex items-baseline gap-1.5">
           <span className="text-[9px] font-bold uppercase tracking-widest shrink-0" style={{ color: `${N}45` }}>
@@ -72,27 +85,24 @@ function FessCard({ fess, index }: { fess: FessItem; index: number }) {
             {fess.recipient}
           </span>
         </div>
+
         <p className="text-[12px] leading-relaxed line-clamp-3" style={{ color: `${N}AA` }}>
           {fess.message}
         </p>
+
         <div
           className="flex items-center justify-between pt-2"
           style={{ borderTop: `1px solid ${N}09` }}
-        >
+          >
           <span className="text-[10px]" style={{ color: `${N}40` }}>
             {fess.createdAt}
           </span>
-          {!fess.isAnon && fess.sender && (
-            <span >
-               {fess.sender}
-            </span>
-          )}
         </div>
       </div>
+          </Link>
     </motion.div>
   );
 }
-
 
 function EmptyState() {
   return (
@@ -100,7 +110,7 @@ function EmptyState() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-     className="col-span-full flex flex-col items-center justify-center pt-16 pb-40 text-center"
+      className="col-span-full flex flex-col items-center justify-center pt-16 pb-40 text-center"
     >
       <div
         className="w-16 h-16 rounded-2xl flex items-center justify-center "
@@ -119,7 +129,45 @@ function EmptyState() {
 }
 
 export default function MomentsPage() {
-  const fessList: FessItem[] = [];
+  const [fessList, setFessList] = useState<FessItem[]>([]);
+
+  useEffect(() => {
+    const fetchMoments = async () => {
+      const deviceId = getDeviceId();
+      if (!deviceId) return;
+
+      const { data, error } = await supabase
+        .from("tb_pesan")
+        .select("*")
+        .eq("device_id", deviceId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      if (data) {
+        const mapped = data.map((item) => ({
+          id: item.id,
+          recipient: item.nama_tujuan,
+          sender: item.nama_pengirim,
+          isAnon: !item.nama_pengirim,
+          message: item.pesan,
+          song: {
+            title: item.music_title,
+            artist: item.music_artist,
+            cover: item.music_cover,
+          },
+          createdAt: new Date(item.created_at).toLocaleDateString("id-ID"),
+        }));
+
+        setFessList(mapped);
+      }
+    };
+
+    fetchMoments();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -139,7 +187,6 @@ export default function MomentsPage() {
           </p>
         </motion.div>
 
-      
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {fessList.length === 0 ? (
             <EmptyState />
