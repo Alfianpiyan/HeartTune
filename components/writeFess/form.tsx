@@ -10,6 +10,7 @@ import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { supabase } from "@/lib/db";
 import { useRouter } from "next/navigation";
 import { Variants } from "framer-motion";
+import { toast } from "sonner"
 
 const N = "#0A1F3D";
 
@@ -335,14 +336,14 @@ useEffect(() => {
 
     if (error) {
       console.error(error);
-      alert("Gagal kirim fess 😢");
+      toast.error("Gagal kirim fess");
       return;
     }
 
     setSubmitted(true);
   } catch (err) {
     console.error(err);
-    alert("Terjadi kesalahan");
+    toast.error("Terjadi kesalahan");
   }
 };
 
