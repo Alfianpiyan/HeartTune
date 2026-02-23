@@ -1,8 +1,18 @@
 "use client";
 
-import React, { useState, Suspense, useEffect,  } from "react";
-import { Check, Lock, Send, AlertCircle, Music2, ChevronUp, ChevronDown } from "lucide-react";
-import SongPickerList, { SelectedSong } from "@/components/writeFess/songPicker";
+import React, { useState, Suspense, useEffect } from "react";
+import {
+  Check,
+  Lock,
+  Send,
+  AlertCircle,
+  Music2,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
+import SongPickerList, {
+  SelectedSong,
+} from "@/components/writeFess/songPicker";
 import PreviewCard from "@/components/writeFess/previewCard";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
@@ -10,15 +20,24 @@ import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { supabase } from "@/lib/db";
 import { useRouter } from "next/navigation";
 import { Variants } from "framer-motion";
-import { toast } from "sonner"
+import { toast } from "sonner";
 
 const N = "#0A1F3D";
 
 function FloatingInput({
-  label, value, onChange, disabled = false, maxLength, error,
+  label,
+  value,
+  onChange,
+  disabled = false,
+  maxLength,
+  error,
 }: {
-  label: string; value: string; onChange: (v: string) => void;
-  disabled?: boolean; maxLength?: number; error?: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  maxLength?: number;
+  error?: string;
 }) {
   const [focused, setFocused] = useState(false);
   const active = focused || !!value || disabled;
@@ -59,20 +78,35 @@ function FloatingInput({
       </div>
       {error && (
         <p className="flex items-center gap-1 mt-1 text-[11px] text-red-400 pl-1">
-          <AlertCircle className="w-3 h-3" />{error}
+          <AlertCircle className="w-3 h-3" />
+          {error}
         </p>
       )}
     </div>
   );
 }
 
-
-function AnonToggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+function AnonToggle({
+  value,
+  onChange,
+}: {
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
   return (
-    <button type="button" onClick={() => onChange(!value)} className="flex items-center gap-2.5">
+    <button
+      type="button"
+      onClick={() => onChange(!value)}
+      className="flex items-center gap-2.5"
+    >
       <div
         className="relative transition-all duration-200"
-        style={{ width: 34, height: 20, borderRadius: 99, background: value ? "#2B6CB0" : `${N}22` }}
+        style={{
+          width: 34,
+          height: 20,
+          borderRadius: 99,
+          background: value ? "#2B6CB0" : `${N}22`,
+        }}
       >
         <motion.span
           animate={{ x: value ? 16 : 2 }}
@@ -82,8 +116,14 @@ function AnonToggle({ value, onChange }: { value: boolean; onChange: (v: boolean
         />
       </div>
       <div className="flex items-center gap-1.5">
-        <Lock className="w-3 h-3" style={{ color: value ? "#2B6CB0" : `${N}55` }} />
-        <span className="text-[12px] font-semibold" style={{ color: value ? "#2B6CB0" : `${N}55` }}>
+        <Lock
+          className="w-3 h-3"
+          style={{ color: value ? "#2B6CB0" : `${N}55` }}
+        />
+        <span
+          className="text-[12px] font-semibold"
+          style={{ color: value ? "#2B6CB0" : `${N}55` }}
+        >
           Kirim sebagai anonim
         </span>
       </div>
@@ -92,8 +132,17 @@ function AnonToggle({ value, onChange }: { value: boolean; onChange: (v: boolean
 }
 
 function MessageWithSongIcon({
-  message, onChange, charLimit, error,
-  selectedSong, songPanelOpen, onToggleSong, onSelectSong,  onPreviewSong, songError,audio
+  message,
+  onChange,
+  charLimit,
+  error,
+  selectedSong,
+  songPanelOpen,
+  onToggleSong,
+  onSelectSong,
+  onPreviewSong,
+  songError,
+  audio,
 }: {
   message: string;
   onPreviewSong: (song: SelectedSong) => void;
@@ -112,7 +161,10 @@ function MessageWithSongIcon({
 
   return (
     <div>
-      <p className="text-[11px] font-bold tracking-wide uppercase mb-2" style={{ color: `${N}55` }}>
+      <p
+        className="text-[11px] font-bold tracking-wide uppercase mb-2"
+        style={{ color: `${N}55` }}
+      >
         Pesan <span className="text-rose-400">*</span>
       </p>
       <div
@@ -135,9 +187,12 @@ function MessageWithSongIcon({
               background: songPanelOpen
                 ? "#2B6CB0"
                 : selectedSong
-                ? "#EBF4FF"
-                : `${N}09`,
-              border: selectedSong && !songPanelOpen ? "1.5px solid #2B6CB040" : "none",
+                  ? "#EBF4FF"
+                  : `${N}09`,
+              border:
+                selectedSong && !songPanelOpen
+                  ? "1.5px solid #2B6CB040"
+                  : "none",
             }}
           >
             {selectedSong && !songPanelOpen ? (
@@ -167,7 +222,6 @@ function MessageWithSongIcon({
           )}
         </div>
 
-     
         <textarea
           value={message}
           onChange={(e) => {
@@ -181,7 +235,6 @@ function MessageWithSongIcon({
           style={{ color: N }}
         />
 
-  
         <div
           className="flex items-center justify-between px-4 py-2"
           style={{ background: `${N}04`, borderTop: `1px solid ${N}0C` }}
@@ -189,15 +242,14 @@ function MessageWithSongIcon({
           <div className="flex items-center gap-2">
             {error ? (
               <span className="flex items-center gap-1 text-[11px] text-red-400">
-                <AlertCircle className="w-3 h-3" />{error}
+                <AlertCircle className="w-3 h-3" />
+                {error}
               </span>
             ) : (
-              <span >
-              </span>
+              <span></span>
             )}
           </div>
 
-      
           {selectedSong && (
             <button
               type="button"
@@ -206,8 +258,14 @@ function MessageWithSongIcon({
               style={{ background: "#EBF4FF", color: "#2B6CB0" }}
             >
               <Music2 className="w-3 h-3" />
-              <span className="max-w-[80px] truncate">{selectedSong.title}</span>
-              {songPanelOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              <span className="max-w-[80px] truncate">
+                {selectedSong.title}
+              </span>
+              {songPanelOpen ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )}
             </button>
           )}
 
@@ -219,7 +277,6 @@ function MessageWithSongIcon({
           </span>
         </div>
 
-       
         <AnimatePresence>
           {songPanelOpen && (
             <motion.div
@@ -231,23 +288,23 @@ function MessageWithSongIcon({
               style={{ borderTop: `1px solid #2B6CB025` }}
             >
               <div className="h-full pt-2 pb-1">
-        <SongPickerList
-  selected={selectedSong}
-  playingId={audio.currentId}
-  isPlaying={audio.isPlaying}
-  onSelect={onSelectSong}
-  onPreview={(song) => audio.toggle(song.preview, song.id)} // ✅ pakai toggle
-/>
+                <SongPickerList
+                  selected={selectedSong}
+                  playingId={audio.currentId}
+                  isPlaying={audio.isPlaying}
+                  onSelect={onSelectSong}
+                  onPreview={(song) => audio.toggle(song.preview, song.id)} // ✅ pakai toggle
+                />
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-     
       {songError && !selectedSong && (
         <p className="flex items-center gap-1 mt-1 text-[11px] text-red-400 pl-1">
-          <AlertCircle className="w-3 h-3" />{songError}
+          <AlertCircle className="w-3 h-3" />
+          {songError}
         </p>
       )}
     </div>
@@ -257,11 +314,11 @@ function MessageWithSongIcon({
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 18 },
   show: (i = 0) => ({
-    opacity: 1, y: 0,
+    opacity: 1,
+    y: 0,
     transition: { duration: 0.4, ease: "easeOut", delay: i * 0.08 },
   }),
 };
-
 
 function FormInner() {
   const audio = useAudioPlayer();
@@ -274,20 +331,20 @@ function FormInner() {
   const [songPanelOpen, setSongPanelOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const router = useRouter()
+  const router = useRouter();
   const charLimit = 500;
 
-useEffect(() => {
-  const id = searchParams.get("songId");
-  const title = searchParams.get("songTitle");
-  const artist = searchParams.get("songArtist");
-  const cover = searchParams.get("songCover");
-  const preview = searchParams.get("songPreview");
+  useEffect(() => {
+    const id = searchParams.get("songId");
+    const title = searchParams.get("songTitle");
+    const artist = searchParams.get("songArtist");
+    const cover = searchParams.get("songCover");
+    const preview = searchParams.get("songPreview");
 
-  if (id && title && artist && cover && preview && !selectedSong) {
-    setSelectedSong({ id, title, artist, cover, preview });
-  }
-}, [searchParams, selectedSong]);
+    if (id && title && artist && cover && preview && !selectedSong) {
+      setSelectedSong({ id, title, artist, cover, preview });
+    }
+  }, [searchParams, selectedSong]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -299,76 +356,90 @@ useEffect(() => {
   };
 
   const getDeviceId = () => {
-  if (typeof window === "undefined") return null;
+    if (typeof window === "undefined") return null;
 
-  let id = localStorage.getItem("device_id");
+    let id = localStorage.getItem("device_id");
 
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("device_id", id);
-  }
-
-  return id;
-};
-
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!validate()) return;
-
-    const namaFinal = isAnon 
-    ? "Anonim" 
-    : (sender.trim() || "Seseorang");
-
-  const deviceId = getDeviceId();
-
-  try {
-    const { error } = await supabase.from("tb_pesan").insert({
-      nama_pengirim: namaFinal,
-      nama_tujuan: recipient,
-      pesan: message,
-       deezer_id: selectedSong?.id,
-      music_title: selectedSong?.title,
-      music_artist: selectedSong?.artist,
-      music_cover: selectedSong?.cover,
-      music_preview: selectedSong?.preview,
-      device_id: deviceId,
-    });
-
-    if (error) {
-      console.error(error);
-      toast.error("Gagal kirim fess");
-      return;
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("device_id", id);
     }
 
-    setSubmitted(true);
-  } catch (err) {
-    console.error(err);
-    toast.error("Terjadi kesalahan");
-  }
-};
+    return id;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const namaFinal = isAnon ? "Anonim" : sender.trim() || "Seseorang";
+
+    const deviceId = getDeviceId();
+
+    try {
+      const { error } = await supabase.from("tb_pesan").insert({
+        nama_pengirim: namaFinal,
+        nama_tujuan: recipient,
+        pesan: message,
+        deezer_id: selectedSong?.id,
+        music_title: selectedSong?.title,
+        music_artist: selectedSong?.artist,
+        music_cover: selectedSong?.cover,
+        music_preview: selectedSong?.preview,
+        device_id: deviceId,
+      });
+
+      if (error) {
+        console.error(error);
+        toast.error("Gagal kirim fess");
+        return;
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      toast.error("Terjadi kesalahan");
+    }
+  };
 
   const handleReset = () => {
-  audio.stop();
-  setSubmitted(false);
-  setRecipient("");
-  setSender("");
-  setMessage("");
-  setSelectedSong(null);
-  setIsAnon(false);
-  setSongPanelOpen(false);
-  setErrors({});
-  router.push("/write")
-};
+    audio.stop();
+    setSubmitted(false);
+    setRecipient("");
+    setSender("");
+    setMessage("");
+    setSelectedSong(null);
+    setIsAnon(false);
+    setSongPanelOpen(false);
+    setErrors({});
+    router.push("/write");
+  };
   const songForPreview = selectedSong
-    ? { id: selectedSong.id, title: selectedSong.title, artist: selectedSong.artist, cover: selectedSong.cover }
+    ? {
+        id: selectedSong.id,
+        title: selectedSong.title,
+        artist: selectedSong.artist,
+        cover: selectedSong.cover,
+      }
     : null;
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-6 lg:px-10 pt-10 pb-16" style={{ overflow: "visible" }}>
-
-        <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0} className="mb-10">
-          <h1 className="text-[28px] font-bold leading-tight" style={{ color: N }}>
+      <div
+        className="max-w-6xl mx-auto px-6 lg:px-10 pt-10 pb-16"
+        style={{ overflow: "visible" }}
+      >
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          custom={0}
+          className="mb-10"
+        >
+          <h1
+            className="text-[28px] font-bold leading-tight"
+            style={{ color: N }}
+          >
             Kirim perasaanmu
             <span style={{ color: "#2B6CB0" }}> lewat melodi.</span>
           </h1>
@@ -376,23 +447,32 @@ useEffect(() => {
         </motion.div>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start" style={{ alignItems: "start" }}>
-
-           
-           
-            <motion.div variants={fadeUp} initial="hidden" animate="show" custom={1}>
+          <div
+            className="grid lg:grid-cols-[1fr_360px] gap-8 items-start"
+            style={{ alignItems: "start" }}
+          >
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              custom={1}
+            >
               <div
                 className="rounded-2xl border overflow-visible"
-                style={{ borderColor: `${N}16`, boxShadow: `0 4px 32px ${N}09` }}
+                style={{
+                  borderColor: `${N}16`,
+                  boxShadow: `0 4px 32px ${N}09`,
+                }}
               >
-
-
                 <div className="p-6 space-y-5">
-
                   <FloatingInput
                     label="Kepada *"
                     value={recipient}
-                    onChange={(v) => { setRecipient(v); if (errors.recipient) setErrors(p => ({ ...p, recipient: "" })); }}
+                    onChange={(v) => {
+                      setRecipient(v);
+                      if (errors.recipient)
+                        setErrors((p) => ({ ...p, recipient: "" }));
+                    }}
                     maxLength={50}
                     error={errors.recipient}
                   />
@@ -405,69 +485,89 @@ useEffect(() => {
                       disabled={isAnon}
                       maxLength={50}
                     />
-                    <AnonToggle value={isAnon} onChange={(v) => { setIsAnon(v); if (v) setSender(""); }} />
+                    <AnonToggle
+                      value={isAnon}
+                      onChange={(v) => {
+                        setIsAnon(v);
+                        if (v) setSender("");
+                      }}
+                    />
                   </div>
 
-                
                   <div className="h-px" style={{ background: `${N}0D` }} />
 
-               <MessageWithSongIcon
-               
-  message={message}
-  onChange={setMessage}
-  charLimit={charLimit}
-  error={errors.message}
-  selectedSong={selectedSong}
-  songPanelOpen={songPanelOpen}
-  onToggleSong={() => setSongPanelOpen(o => !o)}
-  onSelectSong={(song) => {
-    setSelectedSong(song);
-    setSongPanelOpen(false);
-    if (errors.song) setErrors(p => ({ ...p, song: "" }));
-  }}
-  onPreviewSong={(song) => audio.toggle(song.preview, song.id)}
-  audio={audio} 
-  songError={errors.song}
-/>
-
+                  <MessageWithSongIcon
+                    message={message}
+                    onChange={setMessage}
+                    charLimit={charLimit}
+                    error={errors.message}
+                    selectedSong={selectedSong}
+                    songPanelOpen={songPanelOpen}
+                    onToggleSong={() => setSongPanelOpen((o) => !o)}
+                    onSelectSong={(song) => {
+                      setSelectedSong(song);
+                      setSongPanelOpen(false);
+                      if (errors.song) setErrors((p) => ({ ...p, song: "" }));
+                    }}
+                    onPreviewSong={(song) =>
+                      audio.toggle(song.preview, song.id)
+                    }
+                    audio={audio}
+                    songError={errors.song}
+                  />
                 </div>
               </div>
             </motion.div>
 
             <motion.div
-              variants={fadeUp} initial="hidden" animate="show" custom={2}
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              custom={2}
               className="hidden lg:block"
               style={{ position: "sticky", top: 32, alignSelf: "start" }}
             >
               <div className="space-y-5">
-
                 <div className="flex items-center gap-3">
-                  <div className="h-px flex-1" style={{ background: `${N}10` }} />
-                  <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: `${N}50` }}>
+                  <div
+                    className="h-px flex-1"
+                    style={{ background: `${N}10` }}
+                  />
+                  <span
+                    className="text-[11px] font-bold tracking-widest uppercase"
+                    style={{ color: `${N}50` }}
+                  >
                     Pratinjau
                   </span>
-                  <div className="h-px flex-1" style={{ background: `${N}10` }} />
+                  <div
+                    className="h-px flex-1"
+                    style={{ background: `${N}10` }}
+                  />
                 </div>
 
-               <PreviewCard
-  recipient={recipient}
-  sender={sender}
-  message={message}
- song={selectedSong ? ({
-  id: selectedSong.id,
-  title: selectedSong.title,
-  artist: selectedSong.artist,
-  cover: selectedSong.cover,
-  preview: selectedSong.preview,
-} as any) : null}
-  isAnon={isAnon}
-  isPlaying={audio.isPlaying}
-  onTogglePlay={() => {
-  if (!selectedSong?.preview) return;
-  audio.toggle(selectedSong.preview, selectedSong.id);
-}}
-/>
-                   <motion.button
+                <PreviewCard
+                  recipient={recipient}
+                  sender={sender}
+                  message={message}
+                  song={
+                    selectedSong
+                      ? ({
+                          id: selectedSong.id,
+                          title: selectedSong.title,
+                          artist: selectedSong.artist,
+                          cover: selectedSong.cover,
+                          preview: selectedSong.preview,
+                        } as any)
+                      : null
+                  }
+                  isAnon={isAnon}
+                  isPlaying={audio.isPlaying}
+                  onTogglePlay={() => {
+                    if (!selectedSong?.preview) return;
+                    audio.toggle(selectedSong.preview, selectedSong.id);
+                  }}
+                />
+                <motion.button
                   whileHover={{ scale: 1.025 }}
                   whileTap={{ scale: 0.965 }}
                   type="submit"
@@ -480,12 +580,14 @@ useEffect(() => {
                   Kirim Fess
                 </motion.button>
 
-                <p className="text-center text-[11px]" style={{ color: `${N}45` }}>
+                <p
+                  className="text-center text-[11px]"
+                  style={{ color: `${N}45` }}
+                >
                   Fess akan tampil di koleksi setelah dikirim
                 </p>
               </div>
             </motion.div>
-
           </div>
 
           <div className="lg:hidden mt-6">
@@ -503,7 +605,6 @@ useEffect(() => {
               Kirim Fess
             </motion.button>
           </div>
-
         </form>
       </div>
 
@@ -514,7 +615,10 @@ useEffect(() => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center px-4"
-            style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(8px)" }}
+            style={{
+              background: "rgba(255,255,255,0.88)",
+              backdropFilter: "blur(8px)",
+            }}
           >
             <motion.div
               initial={{ scale: 0.88, opacity: 0, y: 20 }}
@@ -522,20 +626,35 @@ useEffect(() => {
               exit={{ scale: 0.94, opacity: 0 }}
               transition={{ type: "spring", stiffness: 280, damping: 22 }}
               className="bg-white rounded-2xl px-10 py-10 text-center max-w-xs w-full"
-              style={{ border: `1px solid ${N}12`, boxShadow: `0 24px 64px ${N}1A` }}
+              style={{
+                border: `1px solid ${N}12`,
+                boxShadow: `0 24px 64px ${N}1A`,
+              }}
             >
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.1, type: "spring", stiffness: 260, damping: 16 }}
+                transition={{
+                  delay: 0.1,
+                  type: "spring",
+                  stiffness: 260,
+                  damping: 16,
+                }}
                 className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5"
                 style={{ background: "#EBF4FF" }}
               >
                 <Check className="w-7 h-7" style={{ color: "#2B6CB0" }} />
               </motion.div>
-              <h3 className="text-[18px] font-bold mb-2" style={{ color: N }}>Terkirim!</h3>
-              <p className="text-sm leading-relaxed" style={{ color: `${N}70` }}>
-                Pesanmu sudah masuk ke koleksi.<br />Semoga sampai ya!
+              <h3 className="text-[18px] font-bold mb-2" style={{ color: N }}>
+                Terkirim!
+              </h3>
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: `${N}70` }}
+              >
+                Pesanmu sudah masuk ke koleksi.
+                <br />
+                Semoga sampai ya!
               </p>
               <button
                 onClick={handleReset}
@@ -554,12 +673,16 @@ useEffect(() => {
 
 export default function SongFessForm() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-5 h-5 border-2 rounded-full animate-spin"
-          style={{ borderColor: `${N}18`, borderTopColor: N }} />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div
+            className="w-5 h-5 border-2 rounded-full animate-spin"
+            style={{ borderColor: `${N}18`, borderTopColor: N }}
+          />
+        </div>
+      }
+    >
       <FormInner />
     </Suspense>
   );

@@ -25,6 +25,7 @@ export default function DetailPage() {
   const { toggle, isPlaying, currentId } = useAudioPlayer();
   const [data, setData] = useState<Pesan | null>(null);
   const [loading, setLoading] = useState(true);
+  
 
   useEffect(() => {
     if (!id) return;

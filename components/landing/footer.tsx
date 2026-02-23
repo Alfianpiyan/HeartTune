@@ -34,7 +34,23 @@ export function Footer() {
         </div>
         <div className="w-full h-px bg-gradient-to-r from-[#EBF0F7] via-[#B8C9E0]/30 to-transparent" />
 
-      
+{/* Team Dev */}
+<div className="flex flex-col gap-2">
+  <span className="text-[9px] font-bold text-[#0A1F3D]/30 tracking-widest uppercase">
+    Developed by
+  </span>
+
+  <div className="flex flex-wrap gap-2">
+    {["Jepan", "Safina", "Alfian", "Bintang", "Raziq"].map((name) => (
+      <span
+        key={name}
+        className="px-2 py-0.5 rounded-full bg-[#0A1F3D]/5 text-[11px] text-[#0A1F3D]/60 hover:bg-[#0A1F3D]/10 hover:text-[#0A1F3D] transition-all cursor-default"
+      >
+        {name}
+      </span>
+    ))}
+  </div>
+</div>      
         <div className="flex items-center justify-between">
           <p className="text-[11px] text-[#0A1F3D]/25 font-medium">
             © {new Date().getFullYear()} Heartune. All rights reserved.
