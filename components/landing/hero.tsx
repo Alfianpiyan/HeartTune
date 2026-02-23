@@ -156,7 +156,7 @@ function SocialProof() {
   <div className="flex flex-col justify-center min-w-0">
     <div className="flex items-center gap-1.5 flex-wrap">
       <span
-        className="text-[10px] font-bold bg-clip-text text-transparent truncate"
+        className="text-[10px]  text-[#0A1F3D]/40 font-bold bg-clip-text truncate"
         style={{
           backgroundImage:
             "linear-layer(135deg, #0A1F3D 0%, #4A7FBD 100%)",
